@@ -21,8 +21,6 @@ contract Staking {
 
     mapping(address => StakeInfo) public stakes;
 
-    
-
     event Staked(address indexed user, uint256 amount);
     event Claimed(address indexed user, uint256 reward);
     event Withdrawn(address indexed user, uint256 amount);
@@ -46,12 +44,7 @@ contract Staking {
         require(msg.value > 0, "Must stake more than 0");
         require(stakes[msg.sender].amount == 0, "Already staked");
 
-        stakes[msg.sender] = Stake({
-            amount: msg.value,
-            startTime: block.timestamp,
-            withdrawn: false,
-            claimed: false
-        });
+        stakes[msg.sender] = Stake({amount: msg.value, startTime: block.timestamp, withdrawn: false, claimed: false});
 
         totalStaked += msg.value;
         emit Staked(msg.sender, msg.value);
@@ -82,7 +75,7 @@ contract Staking {
         totalWithdrawn[msg.sender] += amount;
         totalWithdrawals += amount;
 
-        (bool sent, ) = (msg.sender).call{value: amount}("");
+        (bool sent,) = (msg.sender).call{value: amount}("");
         require(sent, "ETH withdrawal failed");
 
         emit Withdrawn(msg.sender, amount);
@@ -96,7 +89,7 @@ contract Staking {
         s.withdrawn = true;
         s.claimed = true;
 
-        (bool sent, ) = (msg.sender).call{value: amount}("");
+        (bool sent,) = (msg.sender).call{value: amount}("");
         require(sent, "Emergency ETH transfer failed");
 
         emit EmergencyWithdraw(msg.sender, amount);
@@ -132,7 +125,11 @@ contract Staking {
         return totalStaked;
     }
 
-    function getStakeDetails(address user) external view returns (uint256 amount, uint256 startTime, bool withdrawn, bool claimed) {
+    function getStakeDetails(address user)
+        external
+        view
+        returns (uint256 amount, uint256 startTime, bool withdrawn, bool claimed)
+    {
         Stake storage s = stakes[user];
         return (s.amount, s.startTime, s.withdrawn, s.claimed);
     }
